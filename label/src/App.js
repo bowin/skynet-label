@@ -17,46 +17,33 @@ class App extends Component {
   handleImageLoaded(e) {
   }
   CanvasMouseMoved(x, y) {
-    // console.log('moved ', x, y )
-    // fired after anchor selected
-
-    // ctx.closePath(); 
   }
   CanvasAnchorSelected(x, y) {
 
   }
   componentDidMount() {
+    var self = this
     this.refs.canvas.onmousedown = e => {
       // hold
-      console.log('offset: ', e.offsetX, ' ', e.offsetY)
-      console.log('client: ', e.clientX, ' ', e.clientY)
       let left = parseInt(e.clientX -  this.refs.canvas.offsetLeft)
       let top = parseInt(e.offsetY - this.refs.canvas.offsetTop)
       Data.SelectAnchor(left, top)
-      let p = Data.GetCurrentAnchor()
-      let ctx = self.refs.canvas.getContext('2d')
-      ctx.beginPath();
-      console.log('p: ', p)
-      ctx.rect(p.x, p.y,  1, 1);
-      ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
-      ctx.stroke();
     }
     this.refs.canvas.onmousemove = e => {
-      return
+      // return
       let p = Data.GetCurrentAnchor()
       if (!p) return
-      console.log('p :',  p)
-      // console.log('mouse move: ', e.clientX, ' ',  e.clientY)
       let cl = this.refs.canvas.offsetLeft
       let ct = this.refs.canvas.offsetTop
       let cw = this.refs.canvas.width
       let ch = this.refs.canvas.height
       let ctx = self.refs.canvas.getContext('2d')
-      // console.log('mouse move: ', e.clientX - cl, ' ',  e.clientY - ct)
+      ctx.restore()
+      
       ctx.clearRect(0,0, cw, ch);
       ctx.beginPath();
       ctx.lineWidth=3;
-      let x = parseInt(e.clientX - cl)
+      let x = parseInt(e.offsetX)
       let y = parseInt(e.offsetY - ct)
       ctx.rect(p.x, p.y,  x - p.x, y - p.y);
       ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
@@ -66,25 +53,32 @@ class App extends Component {
       Data.tl = null
     }
     console.log('did mount')
-    var s = new Image();
-    var self = this
-    s.onload = e => {
+
+    this.refs.img.onload = e => {
       console.log(e.target.width)
       console.log(e.target.height)
+      // img 
+      this.refs.img.width = e.target.width
+      this.refs.img.height = e.target.height
+      
+      // canvas
       self.refs.canvas.width = e.target.width
       self.refs.canvas.height = e.target.height
       let ctx = self.refs.canvas.getContext('2d')
       console.log('ctx: width, height: ', self.refs.canvas.width, self.refs.canvas.height)
       console.log("offset", self.refs.canvas.offsetX)
-      ctx.drawImage(s,0,0, self.refs.canvas.width, self.refs.canvas.height);
+      ctx.save()
     }
-    s.src = src
+    this.refs.img.src = src
   }
   render() {
     return (
       <div className="App">
         <header className="App-header">
-        <canvas className="App-logo" ref="canvas"></canvas>
+        <div style={{position:'relative'}} >
+          <img ref="img" style={{position: 'absolute', top:0, left:0, zIndex:-1}}></img>
+          <canvas className="App-logo" ref="canvas"></canvas>
+        </div>
         </header>
       </div>
     );
